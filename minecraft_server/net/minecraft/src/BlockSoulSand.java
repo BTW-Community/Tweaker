@@ -3,9 +3,8 @@ package net.minecraft.src;
 public class BlockSoulSand extends Block
 {
 	static {
-		HCSCMod.noticeMeSenpai();
+		HCSCMod.getInstance();
 	}
-	
     public BlockSoulSand(int par1)
     {
         super(par1, Material.sand);

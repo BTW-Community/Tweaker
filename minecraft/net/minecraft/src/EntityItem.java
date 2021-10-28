@@ -1,6 +1,7 @@
 package net.minecraft.src;
 
 import java.util.Iterator;
+
 import net.minecraft.server.MinecraftServer;
 
 public class EntityItem extends Entity
@@ -16,12 +17,10 @@ public class EntityItem extends Entity
 
     /** The EntityItem's random initial float height. */
     public float hoverStart;
-    private long m_lAbsoluteItemDespawnTime;
 
     public EntityItem(World par1World, double par2, double par4, double par6)
     {
         super(par1World);
-        this.m_lAbsoluteItemDespawnTime = 0L;
         this.age = 0;
         this.health = 5;
         this.hoverStart = (float)(Math.random() * Math.PI * 2.0D);
@@ -52,7 +51,6 @@ public class EntityItem extends Entity
     public EntityItem(World par1World)
     {
         super(par1World);
-        this.m_lAbsoluteItemDespawnTime = 0L;
         this.age = 0;
         this.health = 5;
         this.hoverStart = (float)(Math.random() * Math.PI * 2.0D);
@@ -81,13 +79,19 @@ public class EntityItem extends Entity
         this.prevPosY = this.posY;
         this.prevPosZ = this.posZ;
         this.motionY -= 0.03999999910593033D;
-        this.UpdateHardcoreBuoy();
-
-        if (!this.worldObj.isRemote)
+        // FCMOD: Added
+        UpdateHardcoreBuoy();
+        // END FCMOD
+        // FCMOD: Changed this to reverse Mojang's "fix" to items getting stuck in blocks
+        // and to reduce discrepancies between client and server by pushing only on server
+        /*
+        this.noClip = this.pushOutOfBlocks(this.posX, (this.boundingBox.minY + this.boundingBox.maxY) / 2.0D, this.posZ);
+        */
+        if ( !worldObj.isRemote )
         {
-            this.pushOutOfBlocks(this.posX, (this.boundingBox.minY + this.boundingBox.maxY) / 2.0D, this.posZ);
+        	pushOutOfBlocks( posX, ( boundingBox.minY + boundingBox.maxY) / 2D, posZ );
         }
-
+        // END FCMOD
         this.moveEntity(this.motionX, this.motionY, this.motionZ);
         boolean var1 = (int)this.prevPosX != (int)this.posX || (int)this.prevPosY != (int)this.posY || (int)this.prevPosZ != (int)this.posZ;
 
@@ -128,9 +132,18 @@ public class EntityItem extends Entity
         {
             this.motionY *= -0.5D;
         }
-
+        
         ++this.age;
-        this.CheckForItemDespawn();
+
+        // FCMOD: Code change
+        /*
+        if (!this.worldObj.isRemote && this.age >= 6000)
+        {
+            this.setDead();
+        }
+        */
+        CheckForItemDespawn();
+        // END FCMOD
     }
 
     /**
@@ -244,23 +257,22 @@ public class EntityItem extends Entity
         else
         {
             this.setBeenAttacked();
+	        // FCMOD: Code added
+	        if ( !worldObj.isRemote && !isDead && getEntityItem().getItem().itemID == FCBetterThanWolves.fcItemBlastingOil.itemID )
+	        {
+	    		DetonateBlastingOil();
+	    		
+	    		return false;
+		    }
+	        // END FCMOD
+            this.health -= par2;
 
-            if (!this.worldObj.isRemote && !this.isDead && this.getEntityItem().getItem().itemID == FCBetterThanWolves.fcItemBlastingOil.itemID)
+            if (this.health <= 0)
             {
-                this.DetonateBlastingOil();
-                return false;
+                this.setDead();
             }
-            else
-            {
-                this.health -= par2;
 
-                if (this.health <= 0)
-                {
-                    this.setDead();
-                }
-
-                return false;
-            }
+            return false;
         }
     }
 
@@ -276,8 +288,10 @@ public class EntityItem extends Entity
         {
             par1NBTTagCompound.setCompoundTag("Item", this.getEntityItem().writeToNBT(new NBTTagCompound()));
         }
-
-        par1NBTTagCompound.setLong("fcDespawnTime", this.m_lAbsoluteItemDespawnTime);
+        
+        // FCMOD: Code added
+        par1NBTTagCompound.setLong( "fcDespawnTime", m_lAbsoluteItemDespawnTime );
+	    // END FCMOD    
     }
 
     /**
@@ -290,15 +304,18 @@ public class EntityItem extends Entity
         NBTTagCompound var2 = par1NBTTagCompound.getCompoundTag("Item");
         this.setEntityItemStack(ItemStack.loadItemStackFromNBT(var2));
 
-        if (par1NBTTagCompound.hasKey("fcDespawnTime"))
-        {
-            this.m_lAbsoluteItemDespawnTime = par1NBTTagCompound.getLong("fcDespawnTime");
-        }
-
+        // FCMOD: Code added
+	    if ( par1NBTTagCompound.hasKey( "fcDespawnTime" ) )
+	    {
+	    	m_lAbsoluteItemDespawnTime = par1NBTTagCompound.getLong( "fcDespawnTime" );
+	    }
+	    // END FCMOD	    
+        
         if (this.getEntityItem() == null)
         {
             this.setDead();
         }
+        
     }
 
     /**
@@ -405,68 +422,85 @@ public class EntityItem extends Entity
         this.getDataWatcher().setObjectWatched(10);
     }
 
+    // FCMOD: Code added    
+    private long m_lAbsoluteItemDespawnTime = 0;
+    
     private void UpdateHardcoreBuoy()
     {
-        if (FCBetterThanWolves.IsHardcoreBuoyEnabled(this.worldObj))
+        if ( FCBetterThanWolves.IsHardcoreBuoyEnabled( worldObj ) )
         {
-            byte var1 = 10;
-            double var2 = 0.0D;
-            double var4 = 0.1D;
-
-            for (int var6 = 0; var6 < var1; ++var6)
-            {
-                double var7 = this.boundingBox.minY + (this.boundingBox.maxY - this.boundingBox.minY) * (double)(var6 + 0) * 0.375D + var4;
-                double var9 = this.boundingBox.minY + (this.boundingBox.maxY - this.boundingBox.minY) * (double)(var6 + 1) * 0.375D + var4;
-                AxisAlignedBB var11 = AxisAlignedBB.getAABBPool().getAABB(this.boundingBox.minX, var7, this.boundingBox.minZ, this.boundingBox.maxX, var9, this.boundingBox.maxZ);
-
-                if (!this.worldObj.isAABBInMaterial(var11, Material.water))
-                {
-                    break;
-                }
-
-                var2 += 1.0D / (double)var1;
-            }
-
-            if (var2 > 0.001D)
-            {
-                if (!this.IsInUndertow())
-                {
-                    float var12 = this.getEntityItem().getItem().GetBuoyancy(this.getEntityItem().getItemDamage()) + 1.0F;
-                    this.motionY += 0.04D * (double)var12 * var2;
-                }
-
-                this.motionX *= 0.8999999761581421D;
-                this.motionY *= 0.8999999761581421D;
-                this.motionZ *= 0.8999999761581421D;
-            }
+	        int numDepthChecks = 10;
+	        double d = 0.0D;
+	        double dBoundingYOffset = 0.10D;
+	
+	        for ( int j = 0; j < numDepthChecks; j++ )
+	        {
+	            double d2 = ( boundingBox.minY + ( ( boundingBox.maxY - boundingBox.minY) * (double)(j + 0) ) * ( 0.375D ) ) + dBoundingYOffset;
+	            double d8 = ( boundingBox.minY + ( ( boundingBox.maxY - boundingBox.minY) * (double)(j + 1) ) * ( 0.375D ) ) + dBoundingYOffset;
+	            
+	            AxisAlignedBB axisalignedbb = AxisAlignedBB.getAABBPool().getAABB(boundingBox.minX, d2, boundingBox.minZ, boundingBox.maxX, d8, boundingBox.maxZ);
+	
+	            if ( worldObj.isAABBInMaterial( axisalignedbb, Material.water ) )
+	            {
+	                d += 1.0D / (double)numDepthChecks;
+	            }
+	            else 
+	            {
+	            	break;
+	            }
+	        }
+	        
+	        if ( d > 0.001D )
+	        {
+	    		if ( !IsInUndertow() )
+	    		{
+		        	float fBuoyancyShifted = getEntityItem().getItem().GetBuoyancy( getEntityItem().getItemDamage() ) + 1.0F;
+		        	
+		        	// positive velocity due to boyancy
+		        	
+		        	motionY += 0.04D * fBuoyancyShifted * d;
+	    		}
+		  
+		        // drag due to being in water
+		        
+	        	motionX *= 0.90F;
+	        	motionY *= 0.90F;
+	        	motionZ *= 0.90F;	        	
+	        }	        
         }
     }
 
-    /**
-     * Checks for block collisions, and calls the associated onBlockCollided method for the collided block.
-     */
+    @Override
     protected void doBlockCollisions()
     {
-        int var1 = MathHelper.floor_double(this.boundingBox.minX + 0.001D);
-        int var2 = MathHelper.floor_double(this.boundingBox.minY - 0.01D);
-        int var3 = MathHelper.floor_double(this.boundingBox.minZ + 0.001D);
-        int var4 = MathHelper.floor_double(this.boundingBox.maxX - 0.001D);
-        int var5 = MathHelper.floor_double(this.boundingBox.maxY - 0.001D);
-        int var6 = MathHelper.floor_double(this.boundingBox.maxZ - 0.001D);
+		//Inherited function added so that blocks like Hoppers get collision events with items on top.  
+    	// Copy of code from Entity.java, changes marked with FCMOD.
 
-        if (this.worldObj.checkChunksExist(var1, var2, var3, var4, var5, var6))
+        int i = MathHelper.floor_double(boundingBox.minX + 0.001D);
+        // FCMOD: code change
+        /*
+        int j = MathHelper.floor_double(boundingBox.minY + 0.001D);
+        */
+        int j = MathHelper.floor_double(boundingBox.minY - 0.01D);
+        // END FCMOD
+        int k = MathHelper.floor_double(boundingBox.minZ + 0.001D);
+        int l = MathHelper.floor_double(boundingBox.maxX - 0.001D);
+        int i1 = MathHelper.floor_double(boundingBox.maxY - 0.001D);
+        int j1 = MathHelper.floor_double(boundingBox.maxZ - 0.001D);
+
+        if (worldObj.checkChunksExist(i, j, k, l, i1, j1))
         {
-            for (int var7 = var1; var7 <= var4; ++var7)
+            for (int k1 = i; k1 <= l; k1++)
             {
-                for (int var8 = var2; var8 <= var5; ++var8)
+                for (int l1 = j; l1 <= i1; l1++)
                 {
-                    for (int var9 = var3; var9 <= var6; ++var9)
+                    for (int i2 = k; i2 <= j1; i2++)
                     {
-                        int var10 = this.worldObj.getBlockId(var7, var8, var9);
+                        int j2 = worldObj.getBlockId(k1, l1, i2);
 
-                        if (var10 > 0)
+                        if (j2 > 0)
                         {
-                            Block.blocksList[var10].onEntityCollidedWithBlock(this.worldObj, var7, var8, var9, this);
+                            Block.blocksList[j2].onEntityCollidedWithBlock(worldObj, k1, l1, i2, this);
                         }
                     }
                 }
@@ -476,108 +510,118 @@ public class EntityItem extends Entity
 
     private boolean IsInUndertow()
     {
-        int var1 = MathHelper.floor_double(this.boundingBox.minX);
-        int var2 = MathHelper.floor_double(this.boundingBox.maxX + 1.0D);
-        int var3 = MathHelper.floor_double(this.boundingBox.minY);
-        int var4 = MathHelper.floor_double(this.boundingBox.maxY + 1.0D);
-        int var5 = MathHelper.floor_double(this.boundingBox.minZ);
-        int var6 = MathHelper.floor_double(this.boundingBox.maxZ + 1.0D);
+        int minI = MathHelper.floor_double( boundingBox.minX);
+        int maxI = MathHelper.floor_double( boundingBox.maxX + 1.0D);
+        
+        int minJ = MathHelper.floor_double( boundingBox.minY);
+        int maxJ = MathHelper.floor_double( boundingBox.maxY + 1.0D);
+        
+        int minK = MathHelper.floor_double( boundingBox.minZ);
+        int maxK = MathHelper.floor_double( boundingBox.maxZ + 1.0D );
 
-        for (int var7 = var1; var7 < var2; ++var7)
+        for ( int i = minI; i < maxI; i++ )
         {
-            for (int var8 = var3; var8 < var4; ++var8)
+            for ( int j = minJ; j < maxJ; j++ )
             {
-                for (int var9 = var5; var9 < var6; ++var9)
+                for ( int k = minK; k < maxK; k++ )
                 {
-                    if (this.DoesBlockHaveUndertow(var7, var8, var9))
-                    {
-                        return true;
-                    }
+                	if ( DoesBlockHaveUndertow( i, j, k ) )
+            		{
+                		return true;
+            		}                	
                 }
             }
         }
 
         return false;
     }
-
-    private boolean DoesBlockHaveUndertow(int var1, int var2, int var3)
+    
+    private boolean DoesBlockHaveUndertow( int i, int j, int k )
     {
-        int var4 = this.worldObj.getBlockId(var1, var2, var3);
-
-        if (var4 == Block.waterMoving.blockID || var4 == Block.waterStill.blockID)
-        {
-            int var5 = this.worldObj.getBlockMetadata(var1, var2, var3);
-
-            if (var5 >= 8)
-            {
-                return true;
-            }
-
-            var4 = this.worldObj.getBlockId(var1, var2 - 1, var3);
-
-            if (var4 == Block.waterMoving.blockID || var4 == Block.waterStill.blockID)
-            {
-                var5 = this.worldObj.getBlockMetadata(var1, var2 - 1, var3);
-
-                if (var5 >= 8)
-                {
-                    return true;
-                }
-            }
-
-            var4 = this.worldObj.getBlockId(var1, var2 + 1, var3);
-
-            if (var4 == Block.waterMoving.blockID || var4 == Block.waterStill.blockID)
-            {
-                var5 = this.worldObj.getBlockMetadata(var1, var2 + 1, var3);
-
-                if (var5 >= 8)
-                {
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * Called when the mob is falling. Calculates and applies fall damage.
-     */
-    protected void fall(float var1)
+		int iBlockID = worldObj.getBlockId( i, j, k );
+		
+		if (  iBlockID == Block.waterMoving.blockID || iBlockID == Block.waterStill.blockID )
+		{
+			int iFluidHeight = worldObj.getBlockMetadata( i, j, k );
+			
+			if ( iFluidHeight >= 8 )
+			{
+				return true;
+			}
+	    		
+			iBlockID = worldObj.getBlockId( i, j - 1, k );
+	    		
+    		if (  iBlockID == Block.waterMoving.blockID || iBlockID == Block.waterStill.blockID )
+    		{
+    			iFluidHeight = worldObj.getBlockMetadata( i, j - 1, k );
+    			
+    			if ( iFluidHeight >= 8 )
+    			{
+    				return true;
+    			}
+    		}	    	 
+	    		
+    		iBlockID = worldObj.getBlockId( i, j + 1, k );
+    		
+    		if (  iBlockID == Block.waterMoving.blockID || iBlockID == Block.waterStill.blockID )
+    		{
+    			iFluidHeight = worldObj.getBlockMetadata( i, j + 1, k );
+    			
+    			if ( iFluidHeight >= 8 )
+    			{
+    				return true;
+    			}
+    		}	    	 
+		}
+		
+		return false;
+    }    
+    
+    @Override
+    protected void fall( float fFallDistance )
     {
-        super.fall(var1);
+        super.fall( fFallDistance );
 
-        if (!this.worldObj.isRemote && this.getEntityItem().getItem().itemID == FCBetterThanWolves.fcItemBlastingOil.itemID && var1 > 3.0F)
+        if ( !worldObj.isRemote )
         {
-            this.DetonateBlastingOil();
+	        if ( getEntityItem().getItem().itemID == FCBetterThanWolves.fcItemBlastingOil.itemID )
+	        {
+	        	if ( fFallDistance > 3F )
+	        	{
+	        		DetonateBlastingOil();
+	        	}
+		    }
         }
     }
-
+    
     private void DetonateBlastingOil()
     {
-        int var1 = this.getEntityItem().stackSize;
-        this.health = 0;
-        this.setDead();
+		int iStackSize = getEntityItem().stackSize;
+		
+    	health = 0;
+		setDead();
+		
+		if ( iStackSize > 0 )
+		{
+			// cap the explosion size at that of TNT to avoid overly weaponzing Blasting Oil
+			
+	        float fExplosionSize = 1.5F + ( ( iStackSize - 1 ) * 2.5F / 63.0F );
 
-        if (var1 > 0)
-        {
-            float var2 = 1.5F + (float)(var1 - 1) * 2.5F / 63.0F;
-            this.worldObj.createExplosion((Entity)null, this.posX, this.posY, this.posZ, var2, true);
-        }
+	        worldObj.createExplosion( null, posX, posY, posZ, fExplosionSize, true );
+		}
     }
 
-    /**
-     * Adds velocity to push the entity out of blocks at the specified x, y, z position Args: x, y, z
-     */
-    protected boolean pushOutOfBlocks(double var1, double var3, double var5)
+    @Override
+    protected boolean pushOutOfBlocks(double par1, double par3, double par5)
     {
-        int var7 = MathHelper.floor_double(var1);
-        int var8 = MathHelper.floor_double(var3);
-        int var9 = MathHelper.floor_double(var5);
-        double var10 = var1 - (double)var7;
-        double var12 = var3 - (double)var8;
-        double var14 = var5 - (double)var9;
+    	// Inherited function added to revert Mojang's changes 
+
+        int var7 = MathHelper.floor_double(par1);
+        int var8 = MathHelper.floor_double(par3);
+        int var9 = MathHelper.floor_double(par5);
+        double var10 = par1 - (double)var7;
+        double var12 = par3 - (double)var8;
+        double var14 = par5 - (double)var9;
 
         if (this.worldObj.isBlockNormalCube(var7, var8, var9))
         {
@@ -665,44 +709,55 @@ public class EntityItem extends Entity
             return false;
         }
     }
-
+    
+    @Override
     public boolean IsItemEntity()
     {
-        return true;
+    	return true;
     }
-
+    
+    @Override
     public boolean CanEntityTriggerTripwire()
     {
-        return false;
+    	return false;
     }
-
+    
     private void CheckForItemDespawn()
     {
-        if (!this.worldObj.isRemote)
+        if ( !worldObj.isRemote )
         {
-            if (this.m_lAbsoluteItemDespawnTime > 0L)
-            {
-                long var1 = MinecraftServer.getServer().worldServers[0].getTotalWorldTime();
-
-                if (var1 >= this.m_lAbsoluteItemDespawnTime)
-                {
-                    this.setDead();
-                }
-            }
-            else if (this.age >= 6000)
-            {
-                this.setDead();
-            }
+	        if ( m_lAbsoluteItemDespawnTime > 0 )
+	        {
+	        	// using getTotalWorldTime() here so that /time commands and time advancement due to HC Spawn don't affect it
+	        	
+				long lOverworldTime = MinecraftServer.getServer().worldServers[0].getTotalWorldTime();
+				
+				if ( lOverworldTime >= m_lAbsoluteItemDespawnTime  )
+				{
+					setDead();
+				}				
+	        }
+	        else
+	        {
+		        if ( age >= 6000 )
+		        {
+		            setDead();
+		        }
+	        }
         }
     }
-
-    public void SetEntityItemAsDroppedOnPlayerDeath(EntityPlayer var1)
+    
+    public void SetEntityItemAsDroppedOnPlayerDeath( EntityPlayer player )
     {
-        this.m_lAbsoluteItemDespawnTime = MinecraftServer.getServer().worldServers[0].getTotalWorldTime() + HCSCMod.getConfigLong("deathDespawnTime", "24000");
+    	// set items dropped on player death to despawn 1 Minecraft day (20 minutes) later
+    	// using getTotalWorldTime() here so that /time commands and time advancement due to HC Spawn don't affect it
+    	
+    	m_lAbsoluteItemDespawnTime = MinecraftServer.getServer().worldServers[0].getTotalWorldTime() + HCSCMod.deathDespawnTime;
     }
-
-    public static boolean InstallationIntegrityTestEntityItem()
+    
+    static public boolean InstallationIntegrityTestEntityItem()
     {
-        return true;
+    	return true;
     }
+    // END FCMOD    
 }
