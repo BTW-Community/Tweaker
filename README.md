@@ -75,20 +75,11 @@ lootedTempleRadius=2250
 
 </details>
 
-## List of modified classes
+## Compatability
 <details>
-  <summary>Client</summary>
+  <summary>Modified Classes</summary>
   
-  - BlockSoulSand
-  - EntityItem
-  - FCUtilsHardcoreSpawn
+  - BlockSoulSand (Client|Server)
+  - EntityItem (Client|Server)
+  - FCUtilsHardcoreSpawn (Client|Server)
 </details>
-
-<details>
-  <summary>Server</summary>
-  
-  - BlockSoulSand
-  - EntityItem
-  - FCUtilsHardcoreSpawn
-</details>
-

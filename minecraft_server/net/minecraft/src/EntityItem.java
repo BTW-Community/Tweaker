@@ -743,13 +743,14 @@ public class EntityItem extends Entity
         }
     }
     
-    public void SetEntityItemAsDroppedOnPlayerDeath( EntityPlayer player )
-    {
+    public void SetEntityItemAsDroppedOnPlayerDeath(EntityPlayer player) {
     	// set items dropped on player death to despawn 1 Minecraft day (20 minutes) later
     	// using getTotalWorldTime() here so that /time commands and time advancement due to HC Spawn don't affect it
     	
-    	m_lAbsoluteItemDespawnTime = MinecraftServer.getServer().worldServers[0].getTotalWorldTime() + HCSCMod.deathDespawnTime;
-    }    
+    	if (!worldObj.isRemote) {
+    		m_lAbsoluteItemDespawnTime = MinecraftServer.getServer().worldServers[0].getTotalWorldTime() + HCSCMod.deathDespawnTime;
+    	}
+    }
     
     static public boolean InstallationIntegrityTestEntityItem()
     {
