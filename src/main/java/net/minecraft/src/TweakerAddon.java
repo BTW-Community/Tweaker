@@ -1,10 +1,10 @@
 package net.minecraft.src;
 
-public class ExampleAddon extends FCAddOn {
-    private static ExampleAddon instance;
+public class TweakerAddon extends FCAddOn {
+    private static TweakerAddon instance;
 
-    private ExampleAddon() {
-        super("Example Name", "0.1.0", "Ex");
+    private TweakerAddon() {
+        super("Tweaker", "1.3.0", "tweaker");
     }
 
     @Override
@@ -12,9 +12,9 @@ public class ExampleAddon extends FCAddOn {
         FCAddOnHandler.LogMessage(this.getName() + " Version " + this.getVersionString() + " Initializing...");
     }
 
-    public static ExampleAddon getInstance() {
+    public static TweakerAddon getInstance() {
         if (instance == null)
-            instance = new ExampleAddon();
+            instance = new TweakerAddon();
         return instance;
     }
 }

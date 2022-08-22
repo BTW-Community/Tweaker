@@ -1,32 +1,32 @@
 {
   "schemaVersion": 1,
-  "id": "modid",
+  "id": "tweaker",
   "version": "${version}",
 
-  "name": "Example Mod",
-  "description": "This is an example description! Tell everyone what your mod is about!",
+  "name": "Tweaker",
+  "description": "Lets you tweak various behaviour for Better Than Wolves.",
   "authors": [
-    "Me!"
+    "IssaMe"
   ],
   "contact": {
-    "homepage": "https://fabricmc.net/",
-    "sources": "https://github.com/FabricMC/fabric-example-mod"
+    "homepage": "https://github.com/BTW-Community/HCSpawnConfig",
+    "sources": "https://github.com/BTW-Community/HCSpawnConfig"
   },
 
   "license": "CC0-1.0",
-  "icon": "assets/modid/icon.png",
+  "icon": "assets/tweaker/icon.png",
 
   "environment": "*",
   "entrypoints": {
     "init": [
-      "net.fabricmc.example.ExampleMod"
+      "issame.tweaker.TweakerMod"
     ],
     "preLaunch": [
-      "net.fabricmc.example.ExamplePreLaunchInitializer"
+      "issame.tweaker.PreLaunchInitializer"
     ]
   },
   "mixins": [
-    "modid.mixins.json"
+    "tweaker.mixins.json"
   ],
 
   "depends": {
