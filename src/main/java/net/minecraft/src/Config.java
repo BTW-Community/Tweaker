@@ -23,15 +23,15 @@ public class Config {
 
     private static void verifyConfig() {
         configDouble.forEach((k, v) -> {
-            assertNumber(v >= 0, new NumberInvalidException("Value cannot be less than 0"));
+            assertTrue(v >= 0, new NumberInvalidException("Value cannot be less than 0"));
         });
         double maxSpawnRadius = Config.getDouble("maxSpawnRadius");
         double minSpawnRadius = Config.getDouble("minSpawnRadius");
-        assertNumber(maxSpawnRadius >= minSpawnRadius,
+        assertTrue(maxSpawnRadius >= minSpawnRadius,
                 new NumberInvalidException("maxSpawnRadius must not be less than minSpawnRadius"));
     }
 
-    private static void assertNumber(boolean expression, CommandException exception) {
+    private static void assertTrue(boolean expression, CommandException exception) {
         if (!expression) {
             throw exception;
         }
@@ -43,6 +43,31 @@ public class Config {
 
     public static boolean hasKey(String key) {
         return configComments.containsKey(key);
+    }
+
+    public static String getValueString(String key) {
+        if (configDouble.containsKey(key)) {
+            return configDouble.get(key).toString();
+        }
+        return null;
+    }
+
+    public static void putValue(String key, String value) {
+        if (configDouble.containsKey(key)) {
+            double num = CommandBase.parseDouble(null, value);
+            putType(configDouble, key, num);
+        }
+        throw new CommandNotFoundException();
+    }
+
+    private static <T> void putType(Map<String, T> configType, String key, T value) {
+        T prevValue = configType.put(key, value);
+        try {
+            verifyConfig();
+        } catch (CommandException e) {
+            configType.put(key, prevValue);
+            throw e;
+        }
     }
 
     private static LinkedHashMap<String, String> getConfigComments() {
@@ -91,16 +116,6 @@ public class Config {
 
     public static Double getDouble(String key) {
         return configDouble.get(key);
-    }
-
-    public static void putDouble(String key, Double value) {
-        Double prevValue = configDouble.put(key, value);
-        try {
-            verifyConfig();
-        } catch (CommandException e) {
-            configDouble.put(key, prevValue);
-            throw e;
-        }
     }
 
     public static NBTTagCompound toNBT() {
