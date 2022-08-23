@@ -1,9 +1,6 @@
 package net.minecraft.src;
 
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class Config {
     private static final LinkedHashMap<String, String> configComments = getConfigComments();
@@ -15,6 +12,8 @@ public class Config {
                 configDouble.put(key, Double.valueOf(value));
             }
         });
+
+        verifyConfig();
     }
 
     public static void resetConfig() {
@@ -22,8 +21,28 @@ public class Config {
         loadConfig(TweakerAddon.getInstance().loadConfigProperties());
     }
 
+    private static void verifyConfig() {
+        configDouble.forEach((k, v) -> {
+            assertNumber(v >= 0, new NumberInvalidException("Value cannot be less than 0"));
+        });
+        double maxSpawnRadius = Config.getDouble("maxSpawnRadius");
+        double minSpawnRadius = Config.getDouble("minSpawnRadius");
+        assertNumber(maxSpawnRadius >= minSpawnRadius,
+                new NumberInvalidException("maxSpawnRadius must not be less than minSpawnRadius"));
+    }
+
+    private static void assertNumber(boolean expression, CommandException exception) {
+        if (!expression) {
+            throw exception;
+        }
+    }
+
     public static Set<String> getKeys() {
         return configComments.keySet();
+    }
+
+    public static boolean hasKey(String key) {
+        return configComments.containsKey(key);
     }
 
     private static LinkedHashMap<String, String> getConfigComments() {
@@ -49,7 +68,7 @@ public class Config {
     public static String getComment(String key) {
         return configComments.get(key);
     }
-    
+
     private static Map<String, Double> getDefaultDouble() {
         Map<String, Double> config = new HashMap<>();
 
@@ -74,16 +93,14 @@ public class Config {
         return configDouble.get(key);
     }
 
-    private static NBTTagCompound toNBTDouble() {
-        NBTTagCompound tag = new NBTTagCompound();
-        configDouble.forEach(tag::setDouble);
-        return tag;
-    }
-
-    private static void loadNBTDouble(NBTTagCompound doubleTag) {
-        configDouble.keySet().stream()
-                .filter(doubleTag::hasKey)
-                .forEach(k -> configDouble.put(k, doubleTag.getDouble(k)));
+    public static void putDouble(String key, Double value) {
+        Double prevValue = configDouble.put(key, value);
+        try {
+            verifyConfig();
+        } catch (CommandException e) {
+            configDouble.put(key, prevValue);
+            throw e;
+        }
     }
 
     public static NBTTagCompound toNBT() {
@@ -96,5 +113,17 @@ public class Config {
         if (tweakerTag.hasKey("Double")) {
             loadNBTDouble(tweakerTag.getCompoundTag("Double"));
         }
+    }
+
+    private static NBTTagCompound toNBTDouble() {
+        NBTTagCompound tag = new NBTTagCompound();
+        configDouble.forEach(tag::setDouble);
+        return tag;
+    }
+
+    private static void loadNBTDouble(NBTTagCompound doubleTag) {
+        configDouble.keySet().stream()
+                .filter(doubleTag::hasKey)
+                .forEach(k -> configDouble.put(k, doubleTag.getDouble(k)));
     }
 }
