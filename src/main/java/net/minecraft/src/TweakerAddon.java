@@ -1,10 +1,7 @@
 package net.minecraft.src;
 
-import java.util.Map;
-
 public class TweakerAddon extends FCAddOn {
     private static TweakerAddon instance;
-    private static Map<String, String> config;
 
     private TweakerAddon() {
         super("Tweaker", "1.3.0", "tweaker");
@@ -24,26 +21,19 @@ public class TweakerAddon extends FCAddOn {
     @Override
     public void Initialize() {
         FCAddOnHandler.LogMessage(this.getName() + " Version " + this.getVersionString() + " Initializing...");
-        config = loadConfigProperties();
+        Config.loadConfig(loadConfigProperties());
+    }
+
+    @Override
+    public FCAddOnUtilsWorldData createWorldData() {
+        return new TweakerUtilsWorldData();
     }
 
     private void registerProperties() {
-        // Spawn Radius
-        registerProperty("maxSpawnRadius", "16");  // 2000
-        registerProperty("minSpawnRadius", "0");  // 1000
-        registerProperty("quickSpawnRadius", "100");
-        registerProperty("abandonedVillageRadius", "2250");
-        registerProperty("partiallyAbandonedVillageRadius", "3000");
-        registerProperty("lootedTempleRadius", "2250");
-
-        // Spawn Radius Multipliers
-        registerProperty("largeBiomeMultiplier", "4");
-        registerProperty("endMultiplier", "2.5");
-        registerProperty("witherMultiplier", "2");
-        registerProperty("netherMultiplier", "1.5");
-    }
-
-    public static double getDouble(String key) {
-        return Double.parseDouble(config.get(key));
+        Config.getKeys().forEach(k -> {
+            if (Config.getDouble(k) != null) {
+                registerProperty(k, String.valueOf(Config.getDouble(k)), Config.getComment(k));
+            }
+        });
     }
 }
