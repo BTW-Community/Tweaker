@@ -4,8 +4,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.src.*;
 import net.minecraft.src.Config;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(FCUtilsHardcoreSpawn.class)
@@ -71,12 +70,34 @@ public abstract class FCUtilsHardcoreSpawnMixin {
     private static void GetGameProgressRadiusMultiplier(CallbackInfoReturnable<Double> cir) {
         double multiplier = 1D;
         if (FCUtilsWorld.GameProgressHasEndDimensionBeenAccessedServerOnly()) {
-            multiplier = Config.getDouble("endMultiplier");;
+            multiplier = Config.getDouble("endMultiplier");
         } else if ( FCUtilsWorld.GameProgressHasWitherBeenSummonedServerOnly()) {
-            multiplier = Config.getDouble("witherMultiplier");;
+            multiplier = Config.getDouble("witherMultiplier");
         } else if ( FCUtilsWorld.GameProgressHasNetherBeenAccessedServerOnly()) {
-            multiplier = Config.getDouble("netherMultiplier");;
+            multiplier = Config.getDouble("netherMultiplier");
         }
         cir.setReturnValue(multiplier);
+    }
+
+    private static final String HANDLE_HARDCORE_SPAWN =
+            "HandleHardcoreSpawn(" +
+            "Lnet/minecraft/server/MinecraftServer;" +
+            "Lnet/minecraft/src/EntityPlayerMP;" +
+            "Lnet/minecraft/src/EntityPlayerMP;)V";
+
+    @ModifyConstant(method = HANDLE_HARDCORE_SPAWN, constant = @Constant(intValue = 10))
+    private static int quickSpawnHealth(int health) {
+        return Config.getInteger("quickSpawnHealth");
+    }
+
+    @ModifyVariable(method = HANDLE_HARDCORE_SPAWN, at = @At(value = "STORE", ordinal = 0), ordinal = 0)
+    private static int quickSpawnHungerLoss(int foodLevel) {
+        // Add 6 to counteract `iFoodLevel -= 6`.
+        return foodLevel - Config.getInteger("quickSpawnHungerLoss") + 6;
+    }
+
+    @ModifyConstant(method = HANDLE_HARDCORE_SPAWN, constant = @Constant(intValue = 24))
+    private static int quickSpawnHungerMin(int hungerMin) {
+        return Config.getInteger("quickSpawnHungerMin");
     }
 }

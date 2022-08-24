@@ -45,9 +45,6 @@ public class TweakerCommand extends CommandBase {
     }
 
     private void processCommand(ICommandSender commandSender, String key) {
-        if (!Config.hasKey(key)) {
-            throw new WrongUsageException(getCommandName() + " <option> [value]", key);
-        }
         commandSender.sendChatToPlayer(key + " = " + Config.getValueString(key));
     }
 
