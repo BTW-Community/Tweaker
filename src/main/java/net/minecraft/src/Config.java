@@ -5,12 +5,14 @@ import java.util.*;
 public class Config {
     public static final String DOUBLES_TAG = "Doubles";
     public static final String INTEGERS_TAG = "Integers";
+    public static final String BOOLEANS_TAG = "Booleans";
 
     private static final TweakerAddon tweaker = TweakerAddon.getInstance();
 
     private static final LinkedHashMap<String, String> configComments = getDefaultComments();
     private static Map<String, Double> configDoubles = getDefaultDoubles();
     private static Map<String, Integer> configIntegers = getDefaultIntegers();
+    private static Map<String, Boolean> configBooleans = getDefaultBooleans();
 
     public static void loadConfig(Map<String, String> configProperties) {
         configProperties.forEach(Config::putValue);
@@ -19,6 +21,8 @@ public class Config {
     public static void resetConfig() {
         configDoubles = getDefaultDoubles();
         configIntegers = getDefaultIntegers();
+        configBooleans = getDefaultBooleans();
+
         loadConfig(tweaker.loadConfigProperties());
     }
 
@@ -48,6 +52,7 @@ public class Config {
 
         configs.add(configDoubles);
         configs.add(configIntegers);
+        configs.add(configBooleans);
 
         return configs;
     }
@@ -63,9 +68,9 @@ public class Config {
 
         // Quick Spawn
         config.put("quickSpawnRadius", "The radius at which the player will respawn after dying recently.");
-        config.put("quickSpawnHealth", "The player's health after a quick spawn.");
-        config.put("quickSpawnHungerMin", "The minimum amount of hunger after a quick spawn.");
-        config.put("quickSpawnHungerLoss", "The amount of hunger a player loses on each quick spawn.");
+        config.put("quickSpawnHealth", "The player's health after a quick spawn. (2 = one heart)");
+        config.put("quickSpawnHungerMin", "The minimum amount of hunger after a quick spawn. (6 = one shank)");
+        config.put("quickSpawnHungerLoss", "The amount of hunger a player loses on each quick spawn. (6 = one shank)");
 
         // Spawn Radius Multipliers
         config.put("largeBiomeMultiplier", "Multiplier used for `maxSpawnRadius` when playing with Large Biomes.");
@@ -77,6 +82,9 @@ public class Config {
         config.put("abandonedVillageRadius", "Villages within this radius from world spawn will be abandoned.");
         config.put("partiallyAbandonedVillageRadius", "Villages within this radius from world spawn will be partially abandoned.");
         config.put("lootedTempleRadius", "Temples within this radius from world spawn will be looted.");
+
+        // Other
+        config.put("lightningFire", "Determines if lightning should start fires or not.");
 
         return config;
     }
@@ -116,6 +124,14 @@ public class Config {
         return config;
     }
 
+    private static Map<String, Boolean> getDefaultBooleans() {
+        Map<String, Boolean> config = new HashMap<>();
+
+        config.put("lightningFire", true);
+
+        return config;
+    }
+
     // === Getters ===
 
     public static Set<String> getKeys() {
@@ -143,6 +159,10 @@ public class Config {
         return configIntegers.get(key);
     }
 
+    public static Boolean getBoolean(String key) {
+        return configBooleans.get(key);
+    }
+
     // === Putters ===
 
     public static void putValue(String key, String value) {
@@ -150,6 +170,8 @@ public class Config {
             putType(configDoubles, key, parseDouble(value));
         } else if (configIntegers.containsKey(key)) {
             putType(configIntegers, key, parseInteger(value));
+        } else if (configBooleans.containsKey(key)) {
+            putType(configBooleans, key, parseBoolean(value));
         } else {
             throw new CommandNotFoundException("Could not find command " + key);
         }
@@ -171,6 +193,7 @@ public class Config {
         NBTTagCompound tag = new NBTTagCompound(tweaker.getName());
         tag.setCompoundTag(DOUBLES_TAG, toNBTDoubles());
         tag.setCompoundTag(INTEGERS_TAG, toNBTIntegers());
+        tag.setCompoundTag(BOOLEANS_TAG, toNBTBooleans());
         return tag;
     }
 
@@ -186,6 +209,12 @@ public class Config {
         return tag;
     }
 
+    private static NBTTagCompound toNBTBooleans() {
+        NBTTagCompound tag = new NBTTagCompound();
+        configBooleans.forEach(tag::setBoolean);
+        return tag;
+    }
+
     // === Load from NBT ===
 
     public static void loadNBT(NBTTagCompound tweakerTag) {
@@ -194,6 +223,9 @@ public class Config {
         }
         if (tweakerTag.hasKey(INTEGERS_TAG)) {
             loadNBTIntegers(tweakerTag.getCompoundTag(INTEGERS_TAG));
+        }
+        if (tweakerTag.hasKey(BOOLEANS_TAG)) {
+            loadNBTBooleans(tweakerTag.getCompoundTag(BOOLEANS_TAG));
         }
         verifyConfig();
     }
@@ -210,12 +242,18 @@ public class Config {
                 .forEach(k -> configIntegers.put(k, integersTag.getInteger(k)));
     }
 
+    private static void loadNBTBooleans(NBTTagCompound booleansTag) {
+        configBooleans.keySet().stream()
+                .filter(booleansTag::hasKey)
+                .forEach(k -> configBooleans.put(k, booleansTag.getBoolean(k)));
+    }
+
     // === Parsing ===
 
     private static Double parseDouble(String value) {
         try {
             return Double.parseDouble(value);
-        } catch (NumberFormatException var3) {
+        } catch (NumberFormatException e) {
             throw new NumberInvalidException("commands.generic.double.invalid", value);
         }
     }
@@ -223,8 +261,16 @@ public class Config {
     private static Integer parseInteger(String value) {
         try {
             return Integer.parseInt(value);
-        } catch (NumberFormatException var3) {
+        } catch (NumberFormatException e) {
             throw new NumberInvalidException("commands.generic.num.invalid", value);
+        }
+    }
+
+    private static Boolean parseBoolean(String value) {
+        try {
+            return Boolean.parseBoolean(value);
+        } catch (NumberFormatException e) {
+            throw new NumberInvalidException("commands.generic.boolean.invalid", value);
         }
     }
 }

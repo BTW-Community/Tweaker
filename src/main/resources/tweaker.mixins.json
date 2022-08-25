@@ -4,6 +4,7 @@
   "package": "issame.tweaker.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
+    "FCEntityLightningBoltMixin",
     "FCUtilsHardcoreSpawnMixin"
   ],
   "client": [

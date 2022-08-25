@@ -19,7 +19,6 @@
   "environment": "*",
   "entrypoints": {
     "init": [
-      "issame.tweaker.TweakerMod"
     ],
     "preLaunch": [
       "issame.tweaker.PreLaunchInitializer"
