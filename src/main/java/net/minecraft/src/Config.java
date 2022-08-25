@@ -3,6 +3,11 @@ package net.minecraft.src;
 import java.util.*;
 
 public class Config {
+    public static final String DOUBLES_TAG = "Doubles";
+    public static final String INTEGERS_TAG = "Integers";
+
+    private static final TweakerAddon tweaker = TweakerAddon.getInstance();
+
     private static final LinkedHashMap<String, String> configComments = getDefaultComments();
     private static Map<String, Double> configDoubles = getDefaultDoubles();
     private static Map<String, Integer> configIntegers = getDefaultIntegers();
@@ -14,7 +19,7 @@ public class Config {
     public static void resetConfig() {
         configDoubles = getDefaultDoubles();
         configIntegers = getDefaultIntegers();
-        loadConfig(TweakerAddon.getInstance().loadConfigProperties());
+        loadConfig(tweaker.loadConfigProperties());
     }
 
     private static void verifyConfig() {
@@ -123,7 +128,7 @@ public class Config {
                 return config.get(key).toString();
             }
         }
-        throw new WrongUsageException(TweakerAddon.getInstance().prefix + " <option> [value]", key);
+        throw new WrongUsageException(tweaker.prefix + " <option> [value]", key);
     }
     
     public static String getComment(String key) {
@@ -160,30 +165,49 @@ public class Config {
         }
     }
 
-    // === NBT Logic ===
+    // === Save to NBT ===
 
     public static NBTTagCompound toNBT() {
-        NBTTagCompound tag = new NBTTagCompound("Tweaker");
-        tag.setCompoundTag("Double", toNBTDouble());
+        NBTTagCompound tag = new NBTTagCompound(tweaker.getName());
+        tag.setCompoundTag(DOUBLES_TAG, toNBTDoubles());
+        tag.setCompoundTag(INTEGERS_TAG, toNBTIntegers());
         return tag;
     }
 
-    private static NBTTagCompound toNBTDouble() {
+    private static NBTTagCompound toNBTDoubles() {
         NBTTagCompound tag = new NBTTagCompound();
         configDoubles.forEach(tag::setDouble);
         return tag;
     }
 
-    public static void loadNBT(NBTTagCompound tweakerTag) {
-        if (tweakerTag.hasKey("Double")) {
-            loadNBTDouble(tweakerTag.getCompoundTag("Double"));
-        }
+    private static NBTTagCompound toNBTIntegers() {
+        NBTTagCompound tag = new NBTTagCompound();
+        configIntegers.forEach(tag::setInteger);
+        return tag;
     }
 
-    private static void loadNBTDouble(NBTTagCompound doubleTag) {
+    // === Load from NBT ===
+
+    public static void loadNBT(NBTTagCompound tweakerTag) {
+        if (tweakerTag.hasKey(DOUBLES_TAG)) {
+            loadNBTDoubles(tweakerTag.getCompoundTag(DOUBLES_TAG));
+        }
+        if (tweakerTag.hasKey(INTEGERS_TAG)) {
+            loadNBTIntegers(tweakerTag.getCompoundTag(INTEGERS_TAG));
+        }
+        verifyConfig();
+    }
+
+    private static void loadNBTDoubles(NBTTagCompound doublesTag) {
         configDoubles.keySet().stream()
-                .filter(doubleTag::hasKey)
-                .forEach(k -> configDoubles.put(k, doubleTag.getDouble(k)));
+                .filter(doublesTag::hasKey)
+                .forEach(k -> configDoubles.put(k, doublesTag.getDouble(k)));
+    }
+
+    private static void loadNBTIntegers(NBTTagCompound integersTag) {
+        configIntegers.keySet().stream()
+                .filter(integersTag::hasKey)
+                .forEach(k -> configIntegers.put(k, integersTag.getInteger(k)));
     }
 
     // === Parsing ===

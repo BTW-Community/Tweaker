@@ -31,11 +31,7 @@ public class TweakerAddon extends FCAddOn {
     }
 
     private void registerProperties() {
-        Config.getKeys().forEach(k -> {
-            if (Config.getDouble(k) != null) {
-                registerProperty(k, String.valueOf(Config.getDouble(k)), Config.getComment(k));
-            }
-        });
+        Config.getKeys().forEach(k -> registerProperty(k, Config.getValueString(k), Config.getComment(k)));
     }
 
     private void registerCommands() {
