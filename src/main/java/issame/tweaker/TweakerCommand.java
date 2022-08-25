@@ -1,4 +1,8 @@
-package net.minecraft.src;
+package issame.tweaker;
+
+import net.minecraft.src.CommandBase;
+import net.minecraft.src.ICommandSender;
+import net.minecraft.src.WrongUsageException;
 
 import java.util.List;
 
@@ -7,7 +11,7 @@ public class TweakerCommand extends CommandBase {
 
     @Override
     public String getCommandName() {
-        return tweaker.prefix;
+        return tweaker.getPrefix();
     }
 
     @Override

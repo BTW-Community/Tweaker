@@ -2,7 +2,7 @@ package issame.tweaker.mixin;
 
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.src.*;
-import net.minecraft.src.Config;
+import issame.tweaker.Config;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;

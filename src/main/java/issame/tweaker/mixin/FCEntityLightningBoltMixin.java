@@ -1,6 +1,6 @@
 package issame.tweaker.mixin;
 
-import net.minecraft.src.Config;
+import issame.tweaker.Config;
 import net.minecraft.src.FCEntityLightningBolt;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;

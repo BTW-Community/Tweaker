@@ -1,4 +1,6 @@
-package net.minecraft.src;
+package issame.tweaker;
+
+import net.minecraft.src.*;
 
 import java.util.*;
 
@@ -144,7 +146,7 @@ public class Config {
                 return config.get(key).toString();
             }
         }
-        throw new WrongUsageException(tweaker.prefix + " <option> [value]", key);
+        throw new WrongUsageException(tweaker.getPrefix() + " <option> [value]", key);
     }
     
     public static String getComment(String key) {

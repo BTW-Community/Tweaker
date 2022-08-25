@@ -1,4 +1,9 @@
-package net.minecraft.src;
+package issame.tweaker;
+
+import net.minecraft.src.FCAddOnUtilsWorldData;
+import net.minecraft.src.NBTTagCompound;
+import net.minecraft.src.WorldInfo;
+import net.minecraft.src.WorldServer;
 
 public class TweakerUtilsWorldData implements FCAddOnUtilsWorldData {
     private static final String NAME = TweakerAddon.getInstance().getName();
