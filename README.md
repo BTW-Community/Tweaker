@@ -1,85 +1,71 @@
-# HCSpawnConfig
+# Tweaker
 
-Want to be able to change HC Spawn mechanics? This addon is for you!
+Want to be able to change HC Spawn mechanics? Want to disable lightning fires? This addon is for you!
 
-[Download](https://github.com/BTW-Community/HCSpawnConfig/releases/latest)
+[Download](https://github.com/BTW-Community/Tweaker/releases/latest)
 
-HCSpawn Config currently lets you change the HC Spawn mechanics, as well as abandoned village and looted temple generation conditions.
-Simply run the game once with this addon, which should generate a file at `./config/HCSC.properties`, and modify the values.
+## Installation
+**Fabric is required!**
+- Install Fabric with Better Than Wolves according to these [installation instructions](https://github.com/BTW-Community/BTW-gradle-fabric-example#releasing-modsaddons)
+- Download `tweaker-x.x.x.jar` and place it into the mods folder
+- Enjoy! :)
 
-**This will change behavior for all worlds.**
+## Information
+Tweaker currently lets you change the HC Spawn mechanics, abandoned village and looted temple generation conditions, and whether lightning should start fires.
 
-This addon should also work on servers, and the client does not need to have the addon installed to use it.
+When you start the game with this addon, a file will be generated at `./config/tweaker.properties`. You can modify these values to determine the default behaviour for your worlds. Don't forget to restart the game after modifying the config!
+
+If instead you want to define specific behaviour for only one world, or you do not want to restart the game, you can use the command `/tweaker <option> [value]` to tweak any of the available settings. `/tweaker <option>` will let you see what the current value is.
+
+Currently only works on the client. Server support will be coming later.
 
 <details>
-<summary>Preview of HCSC.properties</summary>
+<summary>Preview of tweaker.properties</summary>
 
 ```python
-# **Respawn Radius**
 
-# Maximum radius the player will respawn from spawn.
-maxRadius=2000
+# The maximum radius the player will respawn from world spawn.
+maxSpawnRadius=2000.0
 
-# Minimum radius the player will respawn from spawn.
-minRadius=1000
+# The minimum radius the player will respawn from world spawn.
+minSpawnRadius=1000.0
 
-# **Respawn Multipliers**
+# The radius at which the player will respawn after dying recently.
+quickSpawnRadius=100.0
 
-# Multiplier after activating a Nether portal.
-netherMultiplier=1.5
+# The player's health after a quick spawn. (2 = one heart)
+quickSpawnHealth=10
 
-# Multiplier after summoning a Wither.
-witherMultiplier=2.0
+# The minimum amount of hunger after a quick spawn. (6 = one shank)
+quickSpawnHungerMin=24
 
-# Multiplier after activating an End portal.
+# The amount of hunger a player loses on each quick spawn. (6 = one shank)
+quickSpawnHungerLoss=6
+
+# Multiplier used for `maxSpawnRadius` when playing with Large Biomes.
+largeBiomeMultiplier=4.0
+
+# Multiplier used for 'maxSpawnRadius' after activating an End portal.
 endMultiplier=2.5
 
-# Multiplier for the Large Biomes world type.
-largeMultiplier=4.0
+# Multiplier used for 'maxSpawnRadius' after summoning a Wither.
+witherMultiplier=2.0
 
-# **Respawn Behaviour**
+# Multiplier used for 'maxSpawnRadius' after activating a Nether portal.
+netherMultiplier=1.5
 
-# The maximum amount of time in ticks between respawns for special respawn behaviour. Players dying within this time will respawn according to quickRespawnRadius. If in multiplayer, players who die in this interval will respawn together, as long as progression hasn't passed hcSoulMating.
-maxSpawnTime=10800
+# Villages within this radius from world spawn will be abandoned.
+abandonedVillageRadius=2250.0
 
-# The maximum radius from the previous respawn the player will respawn at if they have died within maxSpawnTime.
-quickRespawnRadius=100
+# Villages within this radius from world spawn will be partially abandoned.
+partiallyAbandonedVillageRadius=3000.0
 
-# The player's health after a quick respawn (2 = one heart).
-quickRespawnHealth=10
+# Temples within this radius from world spawn will be looted.
+lootedTempleRadius=2250.0
 
-# The player's minimum food after a quick respawn (6 = one shank).
-quickRespawnMinFood=24
+# Determines if lightning should start fires or not.
+lightningFire=true
 
-# The reduction per respawn for the player's food after a quick respawn (6 = one shank).
-quickRespawnFoodDecrement=6
-
-# The point in progression at which Hardcore Soul Mating stops occuring (Overridden by "AlwaysSpawnTogether" in BTW.properties).
-# 0 = On Spawn, 1 = Nether, 2 = Wither, 3 = End.
-hcSoulMating=1
-
-# Ticks until a player's items dropped on death despawn.
-deathDespawnTime=24000
-
-# **Structure Generation**
-
-# Villages within this radius from spawn will be abandoned.
-abandonedVillageRadius=2250
-
-# Villages within this radius from spawn will be partially abandoned.
-partiallyAbandonedRadius=3000
-
-# Temples within this radius from spawn will be looted.
-lootedTempleRadius=2250
 ```
 
-</details>
-
-## Compatability
-<details>
-  <summary>Modified Classes</summary>
-  
-  - BlockSoulSand (Client|Server)
-  - EntityItem (Client|Server)
-  - FCUtilsHardcoreSpawn (Client|Server)
 </details>
