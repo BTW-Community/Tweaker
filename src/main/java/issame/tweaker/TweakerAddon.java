@@ -27,7 +27,6 @@ public class TweakerAddon extends FCAddOn {
     public void Initialize() {
         FCAddOnHandler.LogMessage(this.getName() + " Version " + this.getVersionString() + " Initializing...");
         Config.loadConfig(loadConfigProperties());
-        registerCommands();
     }
 
     @Override
@@ -41,9 +40,5 @@ public class TweakerAddon extends FCAddOn {
 
     private void registerProperties() {
         Config.getKeys().forEach(k -> registerProperty(k, Config.getValueString(k), Config.getComment(k)));
-    }
-
-    private void registerCommands() {
-        ServerCommandManager.registerAddonCommand(new TweakerCommand());
     }
 }
