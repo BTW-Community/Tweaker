@@ -11,13 +11,13 @@ Want to be able to change HC Spawn mechanics? Want to disable lightning fires? T
 - Enjoy! :)
 
 ## Information
-Tweaker currently lets you change the HC Spawn mechanics, abandoned village and looted temple generation conditions, and whether lightning should start fires.
+Tweaker currently lets you change the HC Spawn mechanics, abandoned village and looted temple generation radius, and whether lightning should start fires.
 
 When you start the game with this addon, a file will be generated at `./config/tweaker.properties`. You can modify these values to determine the default behaviour for your worlds. Don't forget to restart the game after modifying the config!
 
 If instead you want to define specific behaviour for only one world, or you do not want to restart the game, you can use the command `/tweaker <option> [value]` to tweak any of the available settings. `/tweaker <option>` will let you see what the current value is.
 
-Currently only works on the client. Server support will be coming later.
+For multiplayer only the server needs to have this mod installed.
 
 <details>
 <summary>Preview of tweaker.properties</summary>
