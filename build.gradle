@@ -21,7 +21,6 @@ version = project.mod_version
 group = project.maven_group
 
 loom {
-    refmapName = 'mixins.modid.refmap.json'
 }
 
 repositories {
