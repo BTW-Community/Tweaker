@@ -1,11 +1,11 @@
 package issame.tweaker;
 
-import net.minecraft.src.FCAddOnUtilsWorldData;
+import btw.world.util.WorldData;
 import net.minecraft.src.NBTTagCompound;
 import net.minecraft.src.WorldInfo;
 import net.minecraft.src.WorldServer;
 
-public class TweakerUtilsWorldData implements FCAddOnUtilsWorldData {
+public class TweakerWorldData implements WorldData {
     private static final String NAME = TweakerAddon.getInstance().getName();
     private static String currentWorld;
 
