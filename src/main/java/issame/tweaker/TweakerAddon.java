@@ -1,15 +1,14 @@
 package issame.tweaker;
 
-import net.minecraft.src.FCAddOn;
-import net.minecraft.src.FCAddOnHandler;
-import net.minecraft.src.FCAddOnUtilsWorldData;
-import net.minecraft.src.ServerCommandManager;
+import btw.AddonHandler;
+import btw.BTWAddon;
+import btw.world.util.WorldData;
 
-public class TweakerAddon extends FCAddOn {
+public class TweakerAddon extends BTWAddon {
     private static TweakerAddon instance;
 
     private TweakerAddon() {
-        super("Tweaker", "1.3.0", "tweaker");
+        super("Tweaker", "1.4.0", "tweaker");
     }
 
     public static TweakerAddon getInstance() {
@@ -19,19 +18,19 @@ public class TweakerAddon extends FCAddOn {
     }
 
     @Override
-    public void PreInitialize() {
+    public void preInitialize() {
         registerProperties();
     }
 
     @Override
-    public void Initialize() {
-        FCAddOnHandler.LogMessage(this.getName() + " Version " + this.getVersionString() + " Initializing...");
+    public void initialize() {
+        AddonHandler.logMessage(this.getName() + " Version " + this.getVersionString() + " Initializing...");
         Config.loadConfig(loadConfigProperties());
     }
 
     @Override
-    public FCAddOnUtilsWorldData createWorldData() {
-        return new TweakerUtilsWorldData();
+    public WorldData createWorldData() {
+        return new TweakerWorldData();
     }
 
     public String getPrefix() {
