@@ -8,7 +8,7 @@ public class TweakerAddon extends BTWAddon {
     private static TweakerAddon instance;
 
     private TweakerAddon() {
-        super("Tweaker", "1.4.0", "tweaker");
+        super("Tweaker", "1.4.1", "tweaker");
     }
 
     public static TweakerAddon getInstance() {

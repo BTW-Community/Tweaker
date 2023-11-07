@@ -12,54 +12,54 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(HardcoreSpawnUtils.class)
 public abstract class HardcoreSpawnUtilsMixin {
 
-    @Inject(method = "getPlayerSpawnRadius()D", at = @At("HEAD"), cancellable = true, remap = false)
-    private static void getPlayerSpawnRadius(CallbackInfoReturnable<Double> cir) {
+    @Inject(method = "getPlayerSpawnRadius", at = @At("HEAD"), cancellable = true, remap = false)
+    private static void getPlayerSpawnRadius(World world, CallbackInfoReturnable<Double> cir) {
         cir.setReturnValue(
                 Config.getDouble("maxSpawnRadius")
-                * HardcoreSpawnUtils.getWorldTypeRadiusMultiplier()
-                * HardcoreSpawnUtils.getGameProgressRadiusMultiplier()
+                * HardcoreSpawnUtils.getWorldTypeRadiusMultiplier(world)
+                * HardcoreSpawnUtils.getGameProgressRadiusMultiplier(world)
         );
     }
 
-    @Inject(method = "getPlayerSpawnExclusionRadius()D", at = @At("HEAD"), cancellable = true, remap = false)
-    private static void getPlayerSpawnExclusionRadius(CallbackInfoReturnable<Double> cir) {
+    @Inject(method = "getPlayerSpawnExclusionRadius", at = @At("HEAD"), cancellable = true, remap = false)
+    private static void getPlayerSpawnExclusionRadius(World world, CallbackInfoReturnable<Double> cir) {
         cir.setReturnValue(
                 Config.getDouble("minSpawnRadius")
-                * HardcoreSpawnUtils.getWorldTypeRadiusMultiplier()
+                * HardcoreSpawnUtils.getWorldTypeRadiusMultiplier(world)
         );
     }
 
-    @Inject(method = "getPlayerMultipleRespawnRadius()D", at = @At("HEAD"), cancellable = true, remap = false)
+    @Inject(method = "getPlayerMultipleRespawnRadius", at = @At("HEAD"), cancellable = true, remap = false)
     private static void getPlayerMultipleRespawnRadius(CallbackInfoReturnable<Double> cir) {
         cir.setReturnValue(Config.getDouble("quickSpawnRadius"));
     }
 
-    @Inject(method = "getAbandonedVillageRadius()D", at = @At("HEAD"), cancellable = true, remap = false)
-    private static void getAbandonedVillageRadius(CallbackInfoReturnable<Double> cir) {
+    @Inject(method = "getAbandonedVillageRadius", at = @At("HEAD"), cancellable = true, remap = false)
+    private static void getAbandonedVillageRadius(World world, CallbackInfoReturnable<Double> cir) {
         cir.setReturnValue(
                 Config.getDouble("abandonedVillageRadius")
-                * HardcoreSpawnUtils.getWorldTypeRadiusMultiplier()
+                * HardcoreSpawnUtils.getWorldTypeRadiusMultiplier(world)
         );
     }
 
-    @Inject(method = "getPartiallyAbandonedVillageRadius()D", at = @At("HEAD"), cancellable = true, remap = false)
-    private static void getPartiallyAbandonedVillageRadius(CallbackInfoReturnable<Double> cir) {
+    @Inject(method = "getPartiallyAbandonedVillageRadius", at = @At("HEAD"), cancellable = true, remap = false)
+    private static void getPartiallyAbandonedVillageRadius(World world, CallbackInfoReturnable<Double> cir) {
         cir.setReturnValue(
                 Config.getDouble("partiallyAbandonedVillageRadius")
-                * HardcoreSpawnUtils.getWorldTypeRadiusMultiplier()
+                * HardcoreSpawnUtils.getWorldTypeRadiusMultiplier(world)
         );
     }
 
-    @Inject(method = "getLootedTempleRadius()D", at = @At("HEAD"), cancellable = true, remap = false)
-    private static void getLootedTempleRadius(CallbackInfoReturnable<Double> cir) {
+    @Inject(method = "getLootedTempleRadius", at = @At("HEAD"), cancellable = true, remap = false)
+    private static void getLootedTempleRadius(World world, CallbackInfoReturnable<Double> cir) {
         cir.setReturnValue(
                 Config.getDouble("lootedTempleRadius")
-                * HardcoreSpawnUtils.getWorldTypeRadiusMultiplier()
+                * HardcoreSpawnUtils.getWorldTypeRadiusMultiplier(world)
         );
     }
 
-    @Inject(method = "getWorldTypeRadiusMultiplier()D", at = @At("HEAD"), cancellable = true, remap = false)
-    private static void getWorldTypeRadiusMultiplier(CallbackInfoReturnable<Double> cir) {
+    @Inject(method = "getWorldTypeRadiusMultiplier", at = @At("HEAD"), cancellable = true, remap = false)
+    private static void getWorldTypeRadiusMultiplier(World world, CallbackInfoReturnable<Double> cir) {
         double multiplier = 1D;
         World overworld = MinecraftServer.getServer().worldServers[0];
         if (overworld != null && overworld.getWorldInfo().getTerrainType() == WorldType.LARGE_BIOMES ) {
@@ -68,8 +68,8 @@ public abstract class HardcoreSpawnUtilsMixin {
         cir.setReturnValue(multiplier);
     }
 
-    @Inject(method = "getGameProgressRadiusMultiplier()D", at = @At("HEAD"), cancellable = true, remap = false)
-    private static void getGameProgressRadiusMultiplier(CallbackInfoReturnable<Double> cir) {
+    @Inject(method = "getGameProgressRadiusMultiplier", at = @At("HEAD"), cancellable = true, remap = false)
+    private static void getGameProgressRadiusMultiplier(World world, CallbackInfoReturnable<Double> cir) {
         double multiplier = 1D;
         if (WorldUtils.gameProgressHasEndDimensionBeenAccessedServerOnly()) {
             multiplier = Config.getDouble("endMultiplier");
