@@ -2,7 +2,7 @@
 
 Want to be able to change HC Spawn mechanics? Want to disable lightning fires? This addon is for you!
 
-[Download](https://github.com/BTW-Community/Tweaker/releases/latest)
+[Download](https://github.com/dddoss/Tweaker/releases/latest)
 
 ## Installation
 **Fabric is required!**
