@@ -2,6 +2,8 @@
 
 Want to be able to change HC Spawn mechanics? Want to disable lightning fires? This addon is for you!
 
+Currently updated for BTW CE 2.1.4. Compatibility with is untested and not guarenteed.
+
 [Download](https://github.com/BTW-Community/Tweaker/releases/latest)
 
 ## Installation
@@ -69,3 +71,14 @@ lightningFire=true
 ```
 
 </details>
+
+## Dev Instructions
+
+For 2.1.4 mod dev, you'll need to obtain the BTW-sources. See https://github.com/BTW-Community/BTW-gradle for
+instructions; the source should be copied to `./src/btw`. Gradle version must be <8 (version 7.2 is configured in
+`gradle-wrapper.properties`).
+
+There is a known issue with this dev environment causing the error `Caused by: java.io.IOException: The account being
+accessed does not support http. for 
+http://resources.download.minecraft.net/99/991b421dfd401f115241601b2b373140a8d78572`. As a workaround, you may need
+to manually copy assets from an existing minecraft jar.
