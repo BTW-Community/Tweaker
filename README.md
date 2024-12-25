@@ -2,7 +2,7 @@
 
 Want to be able to change HC Spawn mechanics? Want to disable lightning fires? This addon is for you!
 
-Currently updated for BTW CE 2.1.4. Compatibility with is untested and not guarenteed.
+Currently updated for BTW CE 2.1.4. Compatibility with is untested and not guaranteed.
 
 [Download](https://github.com/BTW-Community/Tweaker/releases/latest)
 
