@@ -53,7 +53,7 @@ public class TweakerCommand extends CommandBase {
     }
 
     private void processCommand(ICommandSender commandSender, String key, String value) {
-        Config.putValue(key, value);
+        Config.putValue(key, value, true);
         notifyAdmins(commandSender, key + " set to " + value, key, value);
     }
 }

@@ -17,7 +17,7 @@ public class Config {
     private static Map<String, Boolean> configBooleans = getDefaultBooleans();
 
     public static void loadConfig(Map<String, String> configProperties) {
-        configProperties.forEach(Config::putValue);
+        configProperties.forEach((k, v) -> putValue(k, v, false));
     }
 
     public static void resetConfig() {
@@ -26,6 +26,7 @@ public class Config {
         configBooleans = getDefaultBooleans();
 
         loadConfig(tweaker.loadConfigProperties());
+        verifyConfig();
     }
 
     private static void verifyConfig() {
@@ -167,25 +168,27 @@ public class Config {
 
     // === Putters ===
 
-    public static void putValue(String key, String value) {
+    public static void putValue(String key, String value, boolean validate) {
         if (configDoubles.containsKey(key)) {
-            putType(configDoubles, key, parseDouble(value));
+            putType(configDoubles, key, parseDouble(value), validate);
         } else if (configIntegers.containsKey(key)) {
-            putType(configIntegers, key, parseInteger(value));
+            putType(configIntegers, key, parseInteger(value), validate);
         } else if (configBooleans.containsKey(key)) {
-            putType(configBooleans, key, parseBoolean(value));
+            putType(configBooleans, key, parseBoolean(value), validate);
         } else {
             throw new CommandNotFoundException("Could not find command " + key);
         }
     }
 
-    private static <T> void putType(Map<String, T> configType, String key, T value) {
+    private static <T> void putType(Map<String, T> configType, String key, T value, boolean validate) {
         T prevValue = configType.put(key, value);
-        try {
-            verifyConfig();
-        } catch (CommandException e) {
-            configType.put(key, prevValue);
-            throw e;
+        if (validate) {
+            try {
+                verifyConfig();
+            } catch (CommandException e) {
+                configType.put(key, prevValue);
+                throw e;
+            }
         }
     }
 
